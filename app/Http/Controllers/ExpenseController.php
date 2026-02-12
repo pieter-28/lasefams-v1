@@ -20,7 +20,7 @@ class ExpenseController extends Controller
             ->when($request->search, function ($query, $search) {
                 $query->where('description', 'like', "%{$search}%");
             })
-            ->paginate(20)
+            ->paginate(10)
             ->withQueryString();
         return Inertia::render('Expenses/Index', [
             'expenses' => $expenses,
