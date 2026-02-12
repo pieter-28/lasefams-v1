@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateExpenseRequest;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ExpenseController extends Controller
 {
@@ -80,5 +81,26 @@ class ExpenseController extends Controller
     {
         $expense->delete();
         return redirect()->route('expenses.index')->with('success', 'Expense deleted successfully.');
+    }
+
+    /**
+     * Export expenses to PDF.
+     */
+    public function exportPdf(Request $request)
+    {
+        $expenses = Expense::with('user')
+            ->when($request->search, function ($query, $search) {
+                $query->where('description', 'like', "%{$search}%");
+            })
+            ->get();
+
+        $total = $expenses->sum('amount');
+
+        $pdf = Pdf::loadView('exports.expenses-pdf', [
+            'expenses' => $expenses,
+            'total' => $total,
+        ])->setPaper('a4', 'portrait');
+
+        return $pdf->stream('expenses-report.pdf');
     }
 }

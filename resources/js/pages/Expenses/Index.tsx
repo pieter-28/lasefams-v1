@@ -3,7 +3,7 @@ import { Head } from '@inertiajs/react';
 import type { BreadcrumbItem } from '@/types';
 import { dashboard } from '@/routes';
 import { toast } from 'sonner';
-import { Trash, Edit } from 'lucide-react';
+import { Trash, Edit, Download, FileDown, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { router } from '@inertiajs/react';
 import PaginationLaravel from '@/components/PaginationLaravel';
@@ -122,15 +122,35 @@ export default function ExpensesIndex({
                     </CardHeader>
                     <CardContent className="space-y-4">
                         {/* Header Section */}
-                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                            <Button
-                                onClick={() => setOpen(true)}
-                                className="w-full sm:w-auto"
-                            >
-                                Add Expense
-                            </Button>
+                        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                            {/* LEFT SIDE - BUTTON GROUP */}
+                            <div className="flex flex-wrap gap-2">
+                                <Button onClick={() => setOpen(true)}>
+                                    <Plus className="mr-1 h-4 w-4" />
+                                    Add Expense
+                                </Button>
 
-                            <div className="w-full sm:w-80">
+                                <Button
+                                    variant="destructive"
+                                    onClick={() => {
+                                        window.open(
+                                            `/expenses/export/pdf?search=${search}`,
+                                            '_blank',
+                                        );
+                                    }}
+                                >
+                                    <Download className="mr-1 h-4 w-4" />
+                                    Export PDF
+                                </Button>
+
+                                <Button variant="secondary">
+                                    <FileDown className="mr-1 h-4 w-4" />
+                                    Export Excel
+                                </Button>
+                            </div>
+
+                            {/* RIGHT SIDE - SEARCH */}
+                            <div className="w-full lg:w-80">
                                 <InputGroup>
                                     <InputGroupAddon align="inline-start">
                                         <SearchIcon className="h-4 w-4 text-muted-foreground" />
@@ -253,7 +273,9 @@ export default function ExpensesIndex({
                                                 <span className="mr-2">
                                                     Rp.
                                                 </span>
-                                                {totalAmount.toLocaleString('id-ID')}
+                                                {totalAmount.toLocaleString(
+                                                    'id-ID',
+                                                )}
                                             </td>
                                             <td />
                                         </tr>

@@ -19,6 +19,7 @@ Route::get('dashboard', function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::resource('expenses', ExpenseController::class);
+    Route::get('expenses/export/pdf', [ExpenseController::class, 'exportPdf'])->name('expenses.export.pdf');
 });
 
 require __DIR__ . '/settings.php';
