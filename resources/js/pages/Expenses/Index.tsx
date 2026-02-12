@@ -17,6 +17,13 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import {
+    InputGroup,
+    InputGroupAddon,
+    InputGroupInput,
+} from '@/components/ui/input-group';
+import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
+import { SearchIcon } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -36,6 +43,9 @@ export default function ExpensesIndex({
     expenses: {
         data: any[];
         links: any[];
+        from: number;
+        current_page: number;
+        per_page: number;
     };
     filters: {
         search?: string;
@@ -60,6 +70,10 @@ export default function ExpensesIndex({
     const closeModal = () => {
         setOpen(false);
         setSelectedExpense(null);
+        setDeletingExpenseId(null);
+        setConfirmOpen(false);
+        setLoading(false);
+        setSearch('');
     };
     const confirmDelete = () => {
         if (deletingExpenseId === null) return;
@@ -103,9 +117,7 @@ export default function ExpensesIndex({
                 <Card>
                     <CardHeader>
                         <CardTitle>Expenses Management</CardTitle>
-                        <CardDescription>
-                            Manage user expenses.
-                        </CardDescription>
+                        <CardDescription>Manage user expenses.</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="w-full overflow-x-auto">
@@ -117,15 +129,21 @@ export default function ExpensesIndex({
                                     Add Expense
                                 </Button>
                                 <div>
-                                    <input
-                                        type="search"
-                                        placeholder="Search description..."
-                                        value={search}
-                                        onChange={(e) =>
-                                            setSearch(e.target.value)
-                                        }
-                                        className="w-64 rounded border px-3 py-2"
-                                    />
+                                    <Field className="max-w-sm">
+                                        <InputGroup>
+                                            <InputGroupAddon align="inline-start">
+                                                <SearchIcon className="h-4 w-4 text-muted-foreground" />
+                                            </InputGroupAddon>
+                                            <InputGroupInput
+                                                type="search"
+                                                value={search}
+                                                onChange={(e) =>
+                                                    setSearch(e.target.value)
+                                                }
+                                                placeholder="Search expenses..."
+                                            />
+                                        </InputGroup>
+                                    </Field>
                                 </div>
                             </div>
                             <hr className="my-3" />
@@ -133,6 +151,9 @@ export default function ExpensesIndex({
                             <table className="w-full table-auto border-collapse">
                                 <thead>
                                     <tr className="border bg-gray-100 text-sm leading-normal text-gray-700 dark:bg-gray-800 dark:text-gray-200">
+                                        <th className="border-b p-2 text-left">
+                                            #
+                                        </th>
                                         <th className="border-b p-2 text-left">
                                             Description
                                         </th>
@@ -150,8 +171,12 @@ export default function ExpensesIndex({
                                 <tbody>
                                     {/* Example row */}
                                     {expenses.data.length > 0 ? (
-                                        expenses.data.map((expense) => (
+                                        expenses.data.map((expense, index) => (
                                             <tr key={expense.id}>
+                                                <td className="border-b p-2">
+                                                    {(expenses.from ?? 1) +
+                                                        index}
+                                                </td>
                                                 <td className="border-b p-2">
                                                     {expense.description}
                                                 </td>
@@ -194,7 +219,7 @@ export default function ExpensesIndex({
                                     ) : (
                                         <tr>
                                             <td
-                                                colSpan={4}
+                                                colSpan={5}
                                                 className="mb-0 border-b p-2 text-center"
                                             >
                                                 No expenses found.

@@ -12,7 +12,8 @@ import { Label } from '@/components/ui/label';
 import { useForm } from '@inertiajs/react';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
-
+import { Textarea } from '@/components/ui/textarea';
+import { NumericFormat } from 'react-number-format';
 interface Props {
     open: boolean;
     onClose: () => void;
@@ -22,22 +23,24 @@ interface Props {
 export default function ExpenseModal({ open, onClose, expense }: Props) {
     const isEdit = !!expense;
 
-    const { data, setData, post, put, processing, errors, reset } = useForm({
-        description: '',
-        amount: '',
-        date: '',
-    });
+    const { data, setData, post, put, processing, errors, reset, clearErrors } =
+        useForm({
+            description: '',
+            amount: '',
+            date: '',
+        });
 
     useEffect(() => {
-        if (open) {
-            reset();
-        }
-        if (open && expense) {
+        if (!open) return;
+        clearErrors();
+        if (expense) {
             setData({
                 description: expense.description ?? '',
                 amount: expense.amount ?? '',
                 date: expense.date ?? '',
             });
+        } else {
+            reset();
         }
     }, [expense, open]);
 
@@ -54,6 +57,7 @@ export default function ExpenseModal({ open, onClose, expense }: Props) {
             post('/expenses', {
                 onSuccess: () => {
                     reset();
+                    clearErrors();
                     onClose();
                     toast.success('Expense created successfully');
                 },
@@ -74,12 +78,14 @@ export default function ExpenseModal({ open, onClose, expense }: Props) {
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-4">
-                    <div>
+                <div className="grid gap-4 py-4">
+                    <div className="space-y-2">
                         <Label>Description</Label>
-                        <Input
+                        <Textarea
                             value={data.description}
                             placeholder="Expense Description"
+                            rows={3}
+                            className="resize-none"
                             onChange={(e) =>
                                 setData('description', e.target.value)
                             }
@@ -91,13 +97,17 @@ export default function ExpenseModal({ open, onClose, expense }: Props) {
                         )}
                     </div>
 
-                    <div>
+                    <div className="space-y-2">
                         <Label>Amount</Label>
-                        <Input
+                        <NumericFormat
                             value={data.amount}
-                            type="number"
+                            thousandSeparator="."
+                            decimalSeparator=","
+                            onValueChange={(values) => {
+                                setData('amount', values.value); // value tanpa format
+                            }}
+                            customInput={Input}
                             placeholder="Expense Amount"
-                            onChange={(e) => setData('amount', e.target.value)}
                         />
                         {errors.amount && (
                             <p className="text-sm text-red-500">
@@ -106,7 +116,7 @@ export default function ExpenseModal({ open, onClose, expense }: Props) {
                         )}
                     </div>
 
-                    <div>
+                    <div className="space-y-2">
                         <Label>Date</Label>
                         <Input
                             value={data.date}
@@ -123,9 +133,17 @@ export default function ExpenseModal({ open, onClose, expense }: Props) {
                 </div>
 
                 <DialogFooter>
-                    <Button variant="outline" onClick={onClose}>
+                    <Button
+                        variant="outline"
+                        onClick={() => {
+                            reset();
+                            clearErrors();
+                            onClose();
+                        }}
+                    >
                         Cancel
                     </Button>
+
                     <Button onClick={submit} disabled={processing}>
                         {processing ? 'Saving...' : 'Save'}
                     </Button>
