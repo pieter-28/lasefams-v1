@@ -22,7 +22,6 @@ import {
     InputGroupAddon,
     InputGroupInput,
 } from '@/components/ui/input-group';
-import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 import { SearchIcon } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -39,6 +38,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function ExpensesIndex({
     expenses,
     filters,
+    totalAmount,
 }: {
     expenses: {
         data: any[];
@@ -50,6 +50,7 @@ export default function ExpensesIndex({
     filters: {
         search?: string;
     };
+    totalAmount: number;
 }) {
     const [confirmOpen, setConfirmOpen] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -119,119 +120,150 @@ export default function ExpensesIndex({
                         <CardTitle>Expenses Management</CardTitle>
                         <CardDescription>Manage user expenses.</CardDescription>
                     </CardHeader>
-                    <CardContent>
-                        <div className="w-full overflow-x-auto">
-                            <div className="flex justify-between">
-                                <Button
-                                    variant="outline"
-                                    onClick={() => setOpen(true)}
-                                >
-                                    Add Expense
-                                </Button>
-                                <div>
-                                    <Field className="max-w-sm">
-                                        <InputGroup>
-                                            <InputGroupAddon align="inline-start">
-                                                <SearchIcon className="h-4 w-4 text-muted-foreground" />
-                                            </InputGroupAddon>
-                                            <InputGroupInput
-                                                type="search"
-                                                value={search}
-                                                onChange={(e) =>
-                                                    setSearch(e.target.value)
-                                                }
-                                                placeholder="Search expenses..."
-                                            />
-                                        </InputGroup>
-                                    </Field>
-                                </div>
-                            </div>
-                            <hr className="my-3" />
+                    <CardContent className="space-y-4">
+                        {/* Header Section */}
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                            <Button
+                                onClick={() => setOpen(true)}
+                                className="w-full sm:w-auto"
+                            >
+                                Add Expense
+                            </Button>
 
-                            <table className="w-full table-auto border-collapse">
-                                <thead>
-                                    <tr className="border bg-gray-100 text-sm leading-normal text-gray-700 dark:bg-gray-800 dark:text-gray-200">
-                                        <th className="border-b p-2 text-left">
-                                            #
-                                        </th>
-                                        <th className="border-b p-2 text-left">
-                                            Description
-                                        </th>
-                                        <th className="border-b p-2 text-left">
-                                            Date
-                                        </th>
-                                        <th className="border-b p-2 text-left">
-                                            Amount
-                                        </th>
-                                        <th className="border-b p-2 text-left">
-                                            Actions
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {/* Example row */}
-                                    {expenses.data.length > 0 ? (
-                                        expenses.data.map((expense, index) => (
-                                            <tr key={expense.id}>
-                                                <td className="border-b p-2">
-                                                    {(expenses.from ?? 1) +
-                                                        index}
-                                                </td>
-                                                <td className="border-b p-2">
-                                                    {expense.description}
-                                                </td>
-                                                <td className="border-b p-2">
-                                                    {expense.date}
-                                                </td>
-                                                <td className="border-b p-2">
-                                                    $
-                                                    {Number(
-                                                        expense.amount,
-                                                    ).toLocaleString()}
-                                                </td>
-                                                <td className="border-b p-2">
-                                                    <div className="flex gap-2">
-                                                        <Button
-                                                            variant="default"
-                                                            onClick={() => {
-                                                                setSelectedExpense(
-                                                                    expense,
-                                                                );
-                                                                setOpen(true);
-                                                            }}
-                                                        >
-                                                            <Edit />
-                                                        </Button>
-                                                        <Button
-                                                            variant="destructive"
-                                                            onClick={() =>
-                                                                handleDelete(
-                                                                    expense.id,
-                                                                )
-                                                            }
-                                                        >
-                                                            <Trash />
-                                                        </Button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))
-                                    ) : (
-                                        <tr>
-                                            <td
-                                                colSpan={5}
-                                                className="mb-0 border-b p-2 text-center"
-                                            >
-                                                No expenses found.
-                                            </td>
-                                        </tr>
-                                    )}
-                                    {/* More rows can be added here */}
-                                </tbody>
-                            </table>
+                            <div className="w-full sm:w-80">
+                                <InputGroup>
+                                    <InputGroupAddon align="inline-start">
+                                        <SearchIcon className="h-4 w-4 text-muted-foreground" />
+                                    </InputGroupAddon>
+                                    <InputGroupInput
+                                        type="search"
+                                        value={search}
+                                        onChange={(e) =>
+                                            setSearch(e.target.value)
+                                        }
+                                        placeholder="Search expenses..."
+                                    />
+                                </InputGroup>
+                            </div>
                         </div>
 
-                        <div className="mt-4 flex justify-end">
+                        {/* Table */}
+                        <div className="overflow-hidden rounded-xl border bg-background shadow-sm">
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-sm">
+                                    <thead className="bg-muted/50">
+                                        <tr>
+                                            <th className="px-4 py-3 text-left font-medium">
+                                                #
+                                            </th>
+                                            <th className="px-4 py-3 text-left font-medium">
+                                                Description
+                                            </th>
+                                            <th className="px-4 py-3 text-left font-medium">
+                                                Date
+                                            </th>
+                                            <th className="px-4 py-3 text-right font-medium">
+                                                Amount
+                                            </th>
+                                            <th className="px-4 py-3 text-center font-medium">
+                                                Actions
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {expenses.data.length > 0 ? (
+                                            expenses.data.map(
+                                                (expense, index) => (
+                                                    <tr
+                                                        key={expense.id}
+                                                        className="border-t transition hover:bg-muted/40"
+                                                    >
+                                                        <td className="px-4 py-3">
+                                                            {(expenses.from ??
+                                                                1) + index}
+                                                        </td>
+                                                        <td className="px-4 py-3">
+                                                            {
+                                                                expense.description
+                                                            }
+                                                        </td>
+                                                        <td className="px-4 py-3 text-muted-foreground">
+                                                            {expense.date}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-right font-medium">
+                                                            {Number(
+                                                                expense.amount,
+                                                            ).toLocaleString()}
+                                                        </td>
+                                                        <td className="px-4 py-3">
+                                                            <div className="flex justify-center gap-2">
+                                                                <Button
+                                                                    size="icon"
+                                                                    variant="outline"
+                                                                    onClick={() => {
+                                                                        setSelectedExpense(
+                                                                            expense,
+                                                                        );
+                                                                        setOpen(
+                                                                            true,
+                                                                        );
+                                                                    }}
+                                                                >
+                                                                    <Edit className="h-4 w-4" />
+                                                                </Button>
+
+                                                                <Button
+                                                                    size="icon"
+                                                                    variant="destructive"
+                                                                    onClick={() =>
+                                                                        handleDelete(
+                                                                            expense.id,
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    <Trash className="h-4 w-4" />
+                                                                </Button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ),
+                                            )
+                                        ) : (
+                                            <tr>
+                                                <td
+                                                    colSpan={5}
+                                                    className="py-10 text-center text-muted-foreground"
+                                                >
+                                                    No expenses found.
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+
+                                    {/* Footer */}
+                                    <tfoot>
+                                        <tr className="border-t bg-muted/30">
+                                            <td
+                                                colSpan={3}
+                                                className="px-4 py-3 text-right font-semibold"
+                                            >
+                                                Total
+                                            </td>
+                                            <td className="px-4 py-3 text-right font-bold">
+                                                <span className="mr-2">
+                                                    Rp.
+                                                </span>
+                                                {totalAmount.toLocaleString('id-ID')}
+                                            </td>
+                                            <td />
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+
+                        {/* Pagination */}
+                        <div className="flex justify-center sm:justify-end">
                             <PaginationLaravel links={expenses.links} />
                         </div>
                     </CardContent>

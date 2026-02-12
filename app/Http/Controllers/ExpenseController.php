@@ -17,14 +17,15 @@ class ExpenseController extends Controller
     public function index(Request $request)
     {
         $expenses = Expense::with('user')
-        ->when($request->search, function ($query, $search) {
-            $query->where('description', 'like', "%{$search}%");
-        })
-        ->paginate(10)
-        ->withQueryString();
+            ->when($request->search, function ($query, $search) {
+                $query->where('description', 'like', "%{$search}%");
+            })
+            ->paginate(20)
+            ->withQueryString();
         return Inertia::render('Expenses/Index', [
             'expenses' => $expenses,
             'filters' => request()->only(['search']),
+            'totalAmount' => number_format(Expense::sum('amount'), 0, ',', '.'),
         ]);
     }
 
