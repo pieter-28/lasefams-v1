@@ -218,6 +218,7 @@ export default function ExpensesIndex({
                                                         <td className="px-4 py-3">
                                                             <div className="flex justify-center gap-2">
                                                                 <Button
+                                                                    className="cursor-pointer"
                                                                     size="icon"
                                                                     variant="outline"
                                                                     onClick={() => {
@@ -233,6 +234,7 @@ export default function ExpensesIndex({
                                                                 </Button>
 
                                                                 <Button
+                                                                    className="cursor-pointer"
                                                                     size="icon"
                                                                     variant="destructive"
                                                                     onClick={() =>

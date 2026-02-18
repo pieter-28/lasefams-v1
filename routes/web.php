@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\IncomeController;
 
 Route::get('/', function () {
     return Inertia::render('welcome', [
@@ -18,8 +19,11 @@ Route::get('dashboard', function () {
     ->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {
-    Route::resource('expenses', ExpenseController::class);
     Route::get('expenses/export/pdf', [ExpenseController::class, 'exportPdf'])->name('expenses.export.pdf');
+    
+    Route::resource('expenses', ExpenseController::class);
+    Route::resource('incomes', IncomeController::class);
+
 });
 
 require __DIR__ . '/settings.php';

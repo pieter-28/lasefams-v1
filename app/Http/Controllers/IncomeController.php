@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Income;
 use App\Http\Requests\StoreIncomeRequest;
 use App\Http\Requests\UpdateIncomeRequest;
+use Inertia\Inertia;
 
 class IncomeController extends Controller
 {
@@ -13,7 +14,16 @@ class IncomeController extends Controller
      */
     public function index()
     {
-        //
+        $incomes = Income::with('user')
+            ->when(request('search'), function ($query, $search) {
+                $query->where('description', 'like', "%{$search}%");
+            })
+            ->paginate(10)
+            ->withQueryString();
+        return Inertia::render('Incomes/Index', [
+            'incomes' => $incomes,
+            'filters' => request()->only('search'),
+        ]);
     }
 
     /**
@@ -29,7 +39,11 @@ class IncomeController extends Controller
      */
     public function store(StoreIncomeRequest $request)
     {
-        //
+        $validatedData = $request->validated();
+        $validatedData['user_id'] = auth()->id();
+        $income = Income::create($validatedData);
+
+        return redirect()->route('incomes.index')->with('success', 'Income created successfully.');
     }
 
     /**
@@ -53,7 +67,9 @@ class IncomeController extends Controller
      */
     public function update(UpdateIncomeRequest $request, Income $income)
     {
-        //
+        $income->update($request->validated());
+
+        return redirect()->route('incomes.index')->with('success', 'Income updated successfully.');
     }
 
     /**
@@ -61,6 +77,8 @@ class IncomeController extends Controller
      */
     public function destroy(Income $income)
     {
-        //
+        $income->delete();
+
+        return redirect()->route('incomes.index')->with('success', 'Income deleted successfully.');
     }
 }

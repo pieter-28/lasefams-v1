@@ -30,7 +30,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Incomes',
-        href: '#',
+        href: '/incomes',
         icon: ChartColumnDecreasing,
     },
     {
